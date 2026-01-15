@@ -1,0 +1,16 @@
+# PyTorch (CPU版 - Raspberry Pi用)
+torch>=2.0.0
+torchvision>=0.15.0
+
+# ONNX Runtime
+onnxruntime>=1.16.0
+
+# 画像処理
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# ROS2関連（別途ros2パッケージとしてインストール）
+# cv-bridge
+# rclpy
+# sensor_msgs
+# vision_msgs
