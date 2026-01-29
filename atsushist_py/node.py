@@ -12,7 +12,7 @@ import onnxruntime as ort
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from vision_msgs.msg import Detection2DArray
 from cv_bridge import CvBridge
 from builtin_interfaces.msg import Time
@@ -82,31 +82,25 @@ class AtsushistNode(Node):
         
         # サブスクライバー
         self.subscription = self.create_subscription(
-            Image,
-            '/image_raw',
+            CompressedImage,
+            '/image_raw/compressed',
             self.image_callback,
             qos
         )
         
         # パブリッシャー
-        self.img_publisher = self.create_publisher(Image, '/images', 10)
+        self.img_publisher = self.create_publisher(CompressedImage, '/images', 10)
         self.det_publisher = self.create_publisher(Detection2DArray, '/detections', 10)
         
         self.get_logger().info('🚀 atsushist_node 起動完了')
     
-    def image_callback(self, msg: Image):
+    def image_callback(self, msg: CompressedImage):
         """画像コールバック"""
         self.get_logger().info('📷 画像を受信')
         
         try:
-            # ROS画像をnumpy配列に変換
-            if msg.encoding == 'rgb8':
-                cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
-            elif msg.encoding == 'bgr8':
-                cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
-            else:
-                self.get_logger().error(f'❌ 未対応のエンコーディング: {msg.encoding}')
-                return
+            # 圧縮画像をnumpy配列に変換（BGRで取得してRGBに変換）
+            cv_image = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='rgb8')
             
             # 画像サイズ設定
             target_size = (self.image_size, self.image_size)
